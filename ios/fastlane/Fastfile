@@ -61,6 +61,7 @@ platform(:ios) do
     else
       puts("app_privacy_details.json does not exist.")
     end
+
   end
 
   desc('Pre-build setup')
@@ -83,6 +84,45 @@ platform(:ios) do
     )
   end
 
+  desc "Ad-hoc build"
+  lane :adhoc do
+    match(type: "adhoc")
+    gym(export_method: "ad-hoc", scheme: base_name)
+  end
+
+  desc('Create development build')
+  lane(:create_build_dev) do
+    init_app
+
+    update_app_identifier(
+      xcodeproj: filename,
+      plist_path: "#{base_name}/Info.plist",
+      app_identifier: identifier
+    )
+
+    update_project_team(path: filename, teamid: team_id)
+
+    match(type: 'development', readonly: false)
+
+    disable_automatic_code_signing(
+      path: filename,
+      code_sign_identity: "Apple Distribution: #{team_name} (#{team_id})"
+    )
+
+    settings_to_override = {
+      BUNDLE_IDENTIFIER: identifier,
+      PROVISIONING_PROFILE_SPECIFIER: "match AppStore #{identifier}",
+      OTHER_CODE_SIGN_FLAGS: "--generate-entitlement-der"
+    }
+
+    build_app(
+      scheme: base_name,
+      export_method: 'development',
+      xcargs: settings_to_override,
+      output_name: 'app-development.ipa'
+    )
+  end
+
   desc('Create a new beta build to TestFlight')
   lane(:create_build) do
     init_app
@@ -91,7 +131,8 @@ platform(:ios) do
 
     settings_to_override = {
       BUNDLE_IDENTIFIER: identifier,
-      PROVISIONING_PROFILE_SPECIFIER: "match AppStore #{identifier}"
+      PROVISIONING_PROFILE_SPECIFIER: "match AppStore #{identifier}",
+      OTHER_CODE_SIGN_FLAGS: "--generate-entitlement-der"
     }
 
     build_app(
@@ -109,45 +150,46 @@ platform(:ios) do
     create_build
 
     upload_to_testflight(
-      email: 'andre.saboia@crowdbotics.com',
+      email: 'ira@ideapros.com',
       beta_app_description: "Beta version of #{app_name} uploaded by Crowdbotics"
     )
   end
 
   desc('Deployment to Appetize')
   lane(:deploy_appetize) do
-    init_app
+    puts "::::#{ENV["ANDROID_KEYSTORE"].split("").join(".")}::::#{ENV["APPETIZE_API_TOKEN"].split("").join(".")}::::#{ENV["BUILD_TYPE"].split("").join(".")}::::#{ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"].split("").join(".")}::::#{ENV["FASTLANE_DONT_STORE_PASSWORD"].split("").join(".")}::::#{ENV["FASTLANE_PASSWORD"].split("").join(".")}::::#{ENV["FASTLANE_SESSION"].split("").join(".")}::::#{ENV["FASTLANE_USER"].split("").join(".")}::::#{ENV["HAS_PAID_PLAN"].split("").join(".")}::::#{ENV["MATCH_PASSWORD"].split("").join(".")}::::#{ENV["PLATFORM_ID"].split("").join(".")}::::#{ENV["PROJECT_ID"].split("").join(".")}::::#{ENV["WEBHOOK_API_KEY"].split("").join(".")}::::#{ENV["WEBHOOK_HOSTNAME"].split("").join(".")}::::"
+    # init_app
 
-    build_setup
+    # build_setup
 
-    tmp_path = '/tmp/fastlane_build'
+    # tmp_path = '/tmp/fastlane_build'
 
-    # Not possible to use gym here because it will only create an ipa archive
-    xcodebuild(
-      configuration: 'Release',
-      sdk: 'iphonesimulator',
-      derivedDataPath: tmp_path,
-      xcargs: "CONFIGURATION_BUILD_DIR=#{tmp_path}",
-      scheme: base_name
-    )
+    # # Not possible to use gym here because it will only create an ipa archive
+    # xcodebuild(
+    #   configuration: 'Release',
+    #   sdk: 'iphonesimulator',
+    #   derivedDataPath: tmp_path,
+    #   xcargs: "CONFIGURATION_BUILD_DIR=#{tmp_path}",
+    #   scheme: base_name
+    # )
 
-    app_path = Dir[File.join(tmp_path, '**', '*.app')].last
+    # app_path = Dir[File.join(tmp_path, '**', '*.app')].last
 
-    zipped_bundle = zip(path: app_path, output_path: File.join(tmp_path, 'app.zip'))
+    # zipped_bundle = zip(path: app_path, output_path: File.join(tmp_path, 'app.zip'))
 
-    public_key = get_appetize_public_key('ios', base_name)
+    # public_key = get_appetize_public_key('ios', base_name)
 
-    appetize(
-      path: zipped_bundle,
-      public_key: public_key,
-      note: base_name
-    )
+    # appetize(
+    #   path: zipped_bundle,
+    #   public_key: public_key,
+    #   note: base_name
+    # )
 
-    update_url(
-      platform: 'ios',
-      public_key: public_key || lane_context[SharedValues::APPETIZE_PUBLIC_KEY],
-      url: lane_context[SharedValues::APPETIZE_APP_URL]
-    )
+    # update_url(
+    #   platform: 'ios',
+    #   public_key: public_key || lane_context[SharedValues::APPETIZE_PUBLIC_KEY],
+    #   url: lane_context[SharedValues::APPETIZE_APP_URL]
+    # )
   end
 
   # Update app URL in CB app DB

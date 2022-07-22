@@ -1,28 +1,98 @@
-version: 2.1
-setup: true
-orbs:
-  continuation: circleci/continuation@0.1.0
+version: 2
 jobs:
-  setup:
-    executor: continuation/default
+  node:
+    working_directory: ~/build
+    docker:
+      - image: cimg/node:14.19
     steps:
       - checkout
-      - run: 
-          name: Generate Pipeline generated_config.yml file
-          command: |
-            if [ "$BUILD_TYPE" == "mobile" ]; then
-              bash .circleci/generate_mobile_config.sh
-            elif [ "$BUILD_TYPE" == "mobile_ios" ]; then
-              bash .circleci/generate_mobile_ios_config.sh
-            elif [ "$BUILD_TYPE" == "mobile_android" ]; then
-              bash .circleci/generate_mobile_android_config.sh
-            elif [ "$BUILD_TYPE" == "gcp" ]; then
-              bash backend/.circleci/generate_gcp_config.sh "backend/"
-            fi
-      - continuation/continue:
-          parameters: '{}'
-          configuration_path: configs/generated_config.yml
+
+      - restore_cache:
+          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
+
+      - restore_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+
+      - run: yarn install
+
+      - save_cache:
+          key: yarn-v1-{{ checksum "yarn.lock" }}-{{ arch }}
+          paths:
+            - ~/.cache/yarn
+
+      - save_cache:
+          key: node-v1-{{ checksum "package.json" }}-{{ arch }}
+          paths:
+            - node_modules
+
+      #- run:
+      #    name: jest tests
+      #    command: |
+      #      mkdir -p test-results/jest
+      #      yarn run test
+      #    environment:
+      #      JEST_JUNIT_OUTPUT: test-results/jest/junit.xml
+
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - node_modules
+
+      #- store_test_results:
+      #    path: test-results
+
+      #- store_artifacts:
+      #    path: test-results
+
+      - run:
+          name: Webhook Failed
+          command: bash .circleci/webhook_callback.sh "failure"
+          when: on_fail
+
+  ios:
+    macos:
+      xcode: "12.0.0"
+    working_directory: ~/build
+
+    # use a --login shell so our "set Ruby version" command gets picked up for later steps
+    shell: /bin/bash --login -o pipefail
+
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - 'c5:bd:6d:0b:a1:39:97:83:ca:b5:13:59:14:ff:49:40'
+
+      - checkout
+
+      - run:
+          name: set Ruby version
+          command: echo "ruby-2.5" > ~/.ruby-version
+
+      - restore_cache:
+          key: bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
+
+      - run:
+          command: bundle install
+
+      - save_cache:
+          key: bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
+          paths:
+            - vendor/bundle
+
+      - run:
+          name: Populate EnvFile
+          command: env >> .env
+
+      - run:
+          name: Create development build
+          command: bundle exec fastlane deploy_appetize
+          working_directory: ios
+
 workflows:
-  setup-workflow:
+  version: 2
+  node-android-ios:
     jobs:
-      - setup
+      - node
+      - ios:
+          requires:
+            - node

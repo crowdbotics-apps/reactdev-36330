@@ -5,9 +5,9 @@ const NEXT_SCREEN_NAME = "TermsAndConditions";
 
 const Splash = ({ navigation }) => {
   useEffect(() => {
-    setTimeout(() => {
-      navigation.navigate(NEXT_SCREEN_NAME);
-    }, 3000);
+    // setTimeout(() => {
+    //   navigation.navigate(NEXT_SCREEN_NAME);
+    // }, 3000);
   }, []);
 
   return (
