@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Ignore iOS error if there is no paid plan
-if [ "$CIRCLE_JOB" == "ios" ] && [ "$HAS_PAID_PLAN" != 1 ] && [ "$BUILD_TYPE" == "mobile" ]; then
-  echo "No paid plan, not calling webhook"
-  exit
-fi
-
-set -euo pipefail
-
 # Script based on https://altinukshini.wordpress.com/2019/01/09/circleci-notifications-in-rocketchat/
 
 url="https://$WEBHOOK_HOSTNAME/api/v1/github-repos/$PROJECT_ID/circleci_webhook/"

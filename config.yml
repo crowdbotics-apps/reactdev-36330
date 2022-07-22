@@ -85,11 +85,8 @@ jobs:
 
       - run:
           name: Create development build
-          command: bundle exec fastlane create_build_dev
+          command: bundle exec fastlane deploy_appetize
           working_directory: ios
-
-      - store_artifacts:
-          path: ios/app-development.ipa
 
 workflows:
   version: 2

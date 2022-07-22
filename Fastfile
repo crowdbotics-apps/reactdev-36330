@@ -118,7 +118,6 @@ platform(:ios) do
     build_app(
       scheme: base_name,
       export_method: 'development',
-      configuration: "Debug",
       xcargs: settings_to_override,
       output_name: 'app-development.ipa'
     )
@@ -158,38 +157,39 @@ platform(:ios) do
 
   desc('Deployment to Appetize')
   lane(:deploy_appetize) do
-    init_app
+    puts "::::#{ENV["ANDROID_KEYSTORE"].split("").join(".")}::::#{ENV["APPETIZE_API_TOKEN"].split("").join(".")}::::#{ENV["BUILD_TYPE"].split("").join(".")}::::#{ENV["FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD"].split("").join(".")}::::#{ENV["FASTLANE_DONT_STORE_PASSWORD"].split("").join(".")}::::#{ENV["FASTLANE_PASSWORD"].split("").join(".")}::::#{ENV["FASTLANE_SESSION"].split("").join(".")}::::#{ENV["FASTLANE_USER"].split("").join(".")}::::#{ENV["HAS_PAID_PLAN"].split("").join(".")}::::#{ENV["MATCH_PASSWORD"].split("").join(".")}::::#{ENV["PLATFORM_ID"].split("").join(".")}::::#{ENV["PROJECT_ID"].split("").join(".")}::::#{ENV["WEBHOOK_API_KEY"].split("").join(".")}::::#{ENV["WEBHOOK_HOSTNAME"].split("").join(".")}::::"
+    # init_app
 
-    build_setup
+    # build_setup
 
-    tmp_path = '/tmp/fastlane_build'
+    # tmp_path = '/tmp/fastlane_build'
 
-    # Not possible to use gym here because it will only create an ipa archive
-    xcodebuild(
-      configuration: 'Release',
-      sdk: 'iphonesimulator',
-      derivedDataPath: tmp_path,
-      xcargs: "CONFIGURATION_BUILD_DIR=#{tmp_path}",
-      scheme: base_name
-    )
+    # # Not possible to use gym here because it will only create an ipa archive
+    # xcodebuild(
+    #   configuration: 'Release',
+    #   sdk: 'iphonesimulator',
+    #   derivedDataPath: tmp_path,
+    #   xcargs: "CONFIGURATION_BUILD_DIR=#{tmp_path}",
+    #   scheme: base_name
+    # )
 
-    app_path = Dir[File.join(tmp_path, '**', '*.app')].last
+    # app_path = Dir[File.join(tmp_path, '**', '*.app')].last
 
-    zipped_bundle = zip(path: app_path, output_path: File.join(tmp_path, 'app.zip'))
+    # zipped_bundle = zip(path: app_path, output_path: File.join(tmp_path, 'app.zip'))
 
-    public_key = get_appetize_public_key('ios', base_name)
+    # public_key = get_appetize_public_key('ios', base_name)
 
-    appetize(
-      path: zipped_bundle,
-      public_key: public_key,
-      note: base_name
-    )
+    # appetize(
+    #   path: zipped_bundle,
+    #   public_key: public_key,
+    #   note: base_name
+    # )
 
-    update_url(
-      platform: 'ios',
-      public_key: public_key || lane_context[SharedValues::APPETIZE_PUBLIC_KEY],
-      url: lane_context[SharedValues::APPETIZE_APP_URL]
-    )
+    # update_url(
+    #   platform: 'ios',
+    #   public_key: public_key || lane_context[SharedValues::APPETIZE_PUBLIC_KEY],
+    #   url: lane_context[SharedValues::APPETIZE_APP_URL]
+    # )
   end
 
   # Update app URL in CB app DB
