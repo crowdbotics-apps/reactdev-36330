@@ -116,6 +116,7 @@ platform(:ios) do
     }
 
     build_app(
+      workspace: workspace_name,
       scheme: base_name,
       export_method: 'development',
       configuration: "Debug",
