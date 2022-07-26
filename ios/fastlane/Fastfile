@@ -43,7 +43,7 @@ platform(:ios) do
   lane(:init_app) do
     produce(
       app_identifier: identifier,
-      app_name: app_name,
+      app_name: base_name,
       team_name: team_name,
       itc_team_name: team_name
     )
