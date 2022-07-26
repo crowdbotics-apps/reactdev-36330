@@ -102,7 +102,7 @@ platform(:ios) do
 
     update_project_team(path: filename, teamid: team_id)
 
-    match(type: 'development', readonly: false)
+    match(type: 'appstore', readonly: false)
 
     disable_automatic_code_signing(
       path: filename,
@@ -118,7 +118,7 @@ platform(:ios) do
     build_app(
       workspace: workspace_name,
       scheme: base_name,
-      export_method: 'development',
+      export_method: 'appstore',
       configuration: "Debug",
       xcargs: settings_to_override,
       output_name: 'app-development.ipa'
