@@ -99,13 +99,13 @@ platform(:ios) do
       path: filename,
       team_id: team_id,
       bundle_identifier: identifier,
-      profile_name: "match AppStore #{identifier}",
+      # profile_name: "match AppStore #{identifier}",
       # entitlements_file_path: "New.entitlements"
     )
 
     settings_to_override = {
       BUNDLE_IDENTIFIER: identifier,
-      PROVISIONING_PROFILE_SPECIFIER: "match AppStore #{identifier}",
+      # PROVISIONING_PROFILE_SPECIFIER: "match AppStore #{identifier}",
       OTHER_CODE_SIGN_FLAGS: "--generate-entitlement-der"
     }
 
@@ -114,11 +114,11 @@ platform(:ios) do
       # workspace: workspace_name,
       scheme: base_name,
       export_method: 'development',
-      export_options: {
-        provisioningProfiles: { 
-          identifier => "match AppStore #{identifier}",
-        }
-      },
+      # export_options: {
+      #   provisioningProfiles: { 
+      #     identifier => "match AppStore #{identifier}",
+      #   }
+      # },
       configuration: "Debug",
       xcargs: settings_to_override,
       output_name: 'app-development.ipa'

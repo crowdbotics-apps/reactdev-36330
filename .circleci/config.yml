@@ -84,7 +84,7 @@ jobs:
           command: env >> .env
       # - run:
       #     name : Run LS
-      #     command: ls
+      #     command: ls ~/.fastlane/spaceship/
       - run:
           name: Create development build
           command: bundle exec fastlane configsign
