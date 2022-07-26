@@ -82,7 +82,9 @@ jobs:
       - run:
           name: Populate EnvFile
           command: env >> .env
-
+      # - run:
+      #     name : Run LS
+      #     command: ls
       - run:
           name: Create development build
           command: bundle exec fastlane configsign

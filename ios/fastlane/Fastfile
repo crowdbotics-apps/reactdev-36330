@@ -118,7 +118,7 @@ platform(:ios) do
         provisioningProfiles: { 
           identifier => "match AppStore #{identifier}",
         }
-      }
+      },
       configuration: "Debug",
       xcargs: settings_to_override,
       output_name: 'app-development.ipa'
