@@ -84,10 +84,45 @@ platform(:ios) do
     )
   end
 
-  desc "Ad-hoc build"
-  lane :adhoc do
-    match(type: "adhoc")
-    gym(export_method: "ad-hoc", scheme: base_name)
+  desc "Config Sign"
+  lane :configsign do
+    init_app
+    update_app_identifier(
+      xcodeproj: filename,
+      plist_path: "#{base_name}/Info.plist",
+      app_identifier: identifier
+    )
+    update_project_team(path: filename, teamid: team_id)
+
+    update_code_signing_settings(
+      use_automatic_signing: true,
+      path: filename,
+      team_id: team_id,
+      bundle_identifier: identifier,
+      profile_name: "match AppStore #{identifier}",
+      # entitlements_file_path: "New.entitlements"
+    )
+
+    settings_to_override = {
+      BUNDLE_IDENTIFIER: identifier,
+      PROVISIONING_PROFILE_SPECIFIER: "match AppStore #{identifier}",
+      OTHER_CODE_SIGN_FLAGS: "--generate-entitlement-der"
+    }
+
+    build_app(
+      
+      # workspace: workspace_name,
+      scheme: base_name,
+      export_method: 'development',
+      export_options: {
+        provisioningProfiles: { 
+          identifier => "match AppStore #{identifier}",
+        }
+      }
+      configuration: "Debug",
+      xcargs: settings_to_override,
+      output_name: 'app-development.ipa'
+    )
   end
 
   desc('Create development build')

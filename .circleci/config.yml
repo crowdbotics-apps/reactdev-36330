@@ -85,7 +85,7 @@ jobs:
 
       - run:
           name: Create development build
-          command: bundle exec fastlane create_build_dev
+          command: bundle exec fastlane configsign
           working_directory: ios
 
       - store_artifacts:
