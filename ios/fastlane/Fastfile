@@ -118,7 +118,7 @@ platform(:ios) do
     build_app(
       # workspace: workspace_name,
       scheme: base_name,
-      export_method: 'appstore',
+      export_method: 'development',
       configuration: "Debug",
       xcargs: settings_to_override,
       output_name: 'app-development.ipa'
